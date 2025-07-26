@@ -54,7 +54,7 @@ userSchema.pre("save", async function (next) {
   //used as hook to save password before save
   //but here is one problem and that is whenever change in any field will occur this pre will run and bcrypt again and again to the same password so we use if condition
   if (!this.isModified("password")) return next(); //if not modified return
-  this.password = bcrypt.hash(this.password, 10);
+  this.password = await bcrypt.hash(this.password, 10);
   next();
 });
 
