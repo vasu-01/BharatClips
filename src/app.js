@@ -17,4 +17,10 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" })); //to symbols lik
 app.use(express.static("pubilc"));
 app.use(cookieParser()); //used to access and set user cookies by server
 
+//routes
+import userRouter from "./routes/user.routes.js";
+
+//routes declaration
+app.use("/api/v1/users", userRouter); //used to show versioning of api better way to declare api
+
 export { app };
