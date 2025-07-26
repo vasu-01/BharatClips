@@ -2,13 +2,21 @@
 import dotenv from "dotenv"; //this is new way and we can use this by some modification in dev in package.json
 
 import connectDB from "./db/index.js";
+import { app } from "./app.js";
 
 dotenv.config({
   path: "./env",
 });
 
-connectDB();
-
+connectDB()
+  .then(() => {
+    app.listen(process.env.PORT || 8000, () => {
+      console.log(`Server is running at port: ${process.env.PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.log("Mongo db connecetion failed !!!", err);
+  });
 //First Approach
 // import express from "express";
 // const app = express();
