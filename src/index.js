@@ -17,6 +17,7 @@ connectDB()
   .catch((err) => {
     console.log("Mongo db connecetion failed !!!", err);
   });
+
 //First Approach
 // import express from "express";
 // const app = express();
