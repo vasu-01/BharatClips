@@ -15,8 +15,8 @@ const registerUser = asyncHandler(async (req, res) => {
   //check for user creation
   //return response
 
-  const { fullname, email, username, password } = req.body;
-  console.log(email);
+  const { fullName, email, username, password } = req.body;
+  //   console.log(req.body, req.files);
 
   //   if (fullname === "") {
   //     throw new ApiError(400, "fullname is required");
@@ -25,32 +25,44 @@ const registerUser = asyncHandler(async (req, res) => {
   //or we can check like this it will return false if any of field is false
 
   if (
-    [fullname, email, username, password].some((field) => field?.trim() === "")
+    [fullName, email, username, password].some((field) => field?.trim() === "")
   ) {
     throw new ApiError(400, "All fields are required"); //here we are using ApiError util to provide error in standard way
   }
 
-  const existedUser = User.findOne({
+  const existedUser = await User.findOne({
     $or: [{ username }, { email }], //used check any one of matching in db or not
   });
   if (existedUser) {
     throw new ApiError(409, "User with email or username exists");
   }
 
-  const avatarLocalPath = req.files?.avatar[0]?.path;
-  const coverImageLocalPath = req.files?.coverImage[0]?.path;
+  const avatarLocalPath = req.files?.avatar[0]?.path; //one wqy to access path and check if present or not
   if (!avatarLocalPath) {
     throw new ApiError(400, "Avatar file is required");
   }
 
+  //   const coverImageLocalPath = req.files?.coverImage[0]?.path;//second to check the file is present or not as well as if present then taking it in coverImageLocalPath variable in same time
+  let coverImageLocalPath;
+  if (
+    req.files &&
+    Array.isArray(req.files.coverImage) &&
+    req.files.coverImage.length > 0
+  ) {
+    coverImageLocalPath = req.files.coverImage[0].path;
+  }
+
   const avatar = await uploadCloudinary(avatarLocalPath);
+
   const coverImage = await uploadCloudinary(coverImageLocalPath);
+
+  //   console.log(avatar, coverImage);
   if (!avatar) {
-    throw new ApiError(400, "Avatar file is required");
+    throw new ApiError(400, "Avatar file is required for cloudinary");
   }
 
   const user = await User.create({
-    fullname,
+    fullName,
     avatar: avatar.url,
     coverImage: coverImage?.url || "",
     email,
@@ -66,8 +78,8 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(500, "Something went wrong while registering the user");
   }
 
-  return res.status(
-    (201).json(new ApiResponse(200, createdUser, "User registerd successfully")) //here we are using ApiResponse util to provide response in standard way
-  );
+  return res
+    .status(201)
+    .json(new ApiResponse(200, createdUser, "User registerd successfully")); //here we are using ApiResponse util to provide response in standard way
 });
 export { registerUser };
