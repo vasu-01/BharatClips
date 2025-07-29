@@ -8,6 +8,7 @@ import jwt from "jsonwebtoken";
 const generateAccessTokenAndRefreshToken = async (userId) => {
   try {
     const user = await User.findById(userId);
+    // console.log("second:", user);
     const accessToken = user.generateAccessToken();
     const refreshToken = user.generateRefreshToken();
 
@@ -70,12 +71,13 @@ const registerUser = asyncHandler(async (req, res) => {
   ) {
     coverImageLocalPath = req.files.coverImage[0].path;
   }
+  console.log(avatarLocalPath, coverImageLocalPath);
 
   const avatar = await uploadCloudinary(avatarLocalPath);
 
   const coverImage = await uploadCloudinary(coverImageLocalPath);
 
-  //   console.log(avatar, coverImage);
+  console.log(avatar, coverImage);
   if (!avatar) {
     throw new ApiError(400, "Avatar file is required for cloudinary");
   }
@@ -104,6 +106,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
 const loginUser = asyncHandler(async (req, res) => {
   const { email, username, password } = req.body;
+  console.log(email, username, password);
   if (!username && !email) {
     throw new ApiError(400, "username or email is required");
   }
@@ -113,20 +116,22 @@ const loginUser = asyncHandler(async (req, res) => {
   // }
 
   const user = await User.findOne({
+    // email,
     $or: [{ username }, { email }],
   }); //here we find by only one entry but we can check with two condition or etries
   if (!user) {
     throw new ApiError(404, "User does not exist");
   }
+  // console.log(user);
 
   const isPasswordValid = await user.isPasswordCorrect(password);
   if (!isPasswordValid) {
     throw new ApiError(401, "Invalid user credential");
   }
 
-  const { accessToken, refreshToken } = generateAccessTokenAndRefreshToken(
-    user._id
-  );
+  const { accessToken, refreshToken } =
+    await generateAccessTokenAndRefreshToken(user._id);
+  // console.log(accessToken, refreshToken);
 
   const loggedInUser = await User.findById(user._id).select(
     "-password -refreshToken"
@@ -176,7 +181,7 @@ const logoutUser = asyncHandler(async (req, res) => {
 const refreshAccessToken = asyncHandler(async (req, res) => {
   const incomingRefreshToken =
     req.cookies.refreshToken || req.body.refreshToken;
-  if (incomingRefreshToken) {
+  if (!incomingRefreshToken) {
     throw new ApiError(401, "Unauthorized request");
   }
 
