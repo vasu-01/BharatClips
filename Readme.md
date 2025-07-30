@@ -9,3 +9,5 @@
 3. json web token implementation documentation [->](https://github.com/auth0/node-jsonwebtoken)
 
 4. file upload multer documentation [->](https://github.com/expressjs/multer)
+
+5. aggregation pipeline in mongodb [->](https://www.mongodb.com/docs/manual/core/aggregation-pipeline/)
